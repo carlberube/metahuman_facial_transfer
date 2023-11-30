@@ -150,31 +150,32 @@ def load_plugin(plugin_name='fbxmaya'):
 		pm.loadPlugin(plugin_name, quiet=True)
 
 def get_face_controls(namespace=DEFAULT_NAMESPACE):
-	'''
-	Get a list of metahuman face controls
-	Args:
-		namespace (str): namespace
-	Returns:
-		(list of pm.nt.Transforms): list of face controls
-	'''
-	control_set = 'FacialControls'
-	face_control_set = '{}{}'.format(namespace, control_set)
-	if pm.objExists(face_control_set):
-		pm.select(face_control_set, replace=True)
-		controls = pm.selected()
-	else:
-		# If we're missing the FacialControls set, will look by CTRL_ convention naming
-		controls = pm.ls('{}{}'.format(namespace, 'CTRL_*'), type=pm.nt.Transform)
-		
-	face_controls = []
-	# Some controls are shapes so make sure the list is just transforms
-	for control in controls:
-		if isinstance(control, pm.nt.Transform):
-			face_controls.append(control)
-		if isinstance(control, pm.nt.Mesh):
-			face_controls.append(control.getTransform())
-	pm.select(clear=True)
-	return face_controls
+    '''
+    Get a list of metahuman face controls
+    Args:
+        namespace (str): namespace
+    Returns:
+        (list of pm.nt.Transforms): list of face controls
+    '''
+    control_set = 'FacialControls'
+    face_control_set = '{}{}'.format(namespace, control_set)
+    if cmds.objExists(face_control_set):
+        cmds.select(face_control_set, replace=True)
+        controls = cmds.ls(selection=True)
+    else:
+        # If we're missing the FacialControls set, will look by CTRL_ convention naming
+        controls = cmds.ls('{}{}'.format(namespace, 'CTRL_*'), type='transform')
+        
+    face_controls = []
+    # Some controls are shapes so make sure the list is just transforms
+    for control in controls:
+        if cmds.objectType(control) == 'transform':
+            face_controls.append(control)
+        if cmds.objectType(control) == 'mesh':
+            face_controls.append(cmds.listRelatives(control, parent=True)[0])
+    cmds.select(clear=True)
+    return face_controls
+
 
 def select_face_controls(namespace=DEFAULT_NAMESPACE):
 	'''
